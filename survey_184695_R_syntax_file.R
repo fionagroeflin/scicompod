@@ -566,3 +566,4 @@ korr_tab2 <- cor(subset2_cor, method = "pearson")
 
 # Modellvergleiche rechnen----------------------------------------------------
 anova(model1, model2, test="Chisq")
+#what kind of test?
