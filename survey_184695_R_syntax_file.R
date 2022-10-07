@@ -474,6 +474,10 @@ model3 <- lm(trust ~ expert + style + passionate + affiliations + personal + int
 summary(model3)
 # F(11,101)=1.85; p=0.05499
 
+model4 <- lm(trust ~ intentions + facts + methods + quality + sources + balance, data=data_na2)
+summary(model4)
+
+
 
 
 ## Voruassetzungen überprüfen
@@ -565,5 +569,8 @@ korr_tab2 <- cor(subset2_cor, method = "pearson")
 
 
 # Modellvergleiche rechnen----------------------------------------------------
-anova(model1, model2, test="Chisq")
-#what kind of test?
+anova(model1, model2)
+
+#p=0.1848 --> 
+
+anova(model3, model2)
