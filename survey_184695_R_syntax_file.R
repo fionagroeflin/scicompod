@@ -590,7 +590,16 @@ diagnostics(model2BAS, type = c("pip", "model"))
 library(BMA)
 library(survival)
 
+# RUI's CODE
 
+mydata<-data %>% 
+  select(trust,expert,style,passionate,affiliations,personal,intentions,facts,methods,quality,sources) %>% 
+  filter(!is.na(trust)) %>% 
+  tibble()
 
+summary(lm(trust~expert+style+passionate+affiliations+personal+intentions+facts+methods+quality+sources,data=mydata))
 
-
+model <- bic.glm (trust ~ expert+style+passionate+affiliations+personal+intentions+facts+methods+quality+sources,data=mydata, glm.family="gaussian")
+summary(model,digits=2)
+plot(model)
+imageplot.bma(model)
