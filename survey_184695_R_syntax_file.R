@@ -574,3 +574,23 @@ anova(model1, model2)
 #p=0.1848 --> 
 
 anova(model3, model2)
+
+# Bayesian model averaging; PIP -------------------------------------------------
+
+
+library(BAS)
+
+model2BAS <- bas.lm(trust ~ expert + style + passionate + affiliations + personal + intentions + facts + methods + quality + sources + balance + uncertainty, data=data_na2,
+                    prior="ZS-null", modelprior=uniform(), method = "MCMC")
+
+
+diagnostics(model2BAS, type="pip", col = "blue", pch = 16, cex = 1.5)
+diagnostics(model2BAS, type = c("pip", "model"))
+
+library(BMA)
+library(survival)
+
+
+
+
+
