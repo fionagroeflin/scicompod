@@ -597,28 +597,9 @@ mydata<-data %>%
   filter(!is.na(trust)) %>% 
   tibble()
 
-<<<<<<< Updated upstream
 summary(lm(trust~expert+style+passionate+affiliations+personal+intentions+facts+methods+quality+sources,data=mydata))
 
 model <- bic.glm (trust ~ expert+style+passionate+affiliations+personal+intentions+facts+methods+quality+sources,data=mydata, glm.family="gaussian")
 summary(model,digits=2)
 plot(model)
 imageplot.bma(model)
-=======
-### Modell(vergleiche) graphisch darstellen
-
-
-#install.packages("jtools")
-library(jtools)
-#install.packages("huxtable")
-library(huxtable)
-#install.packages("sjPlot")
-library(sjPlot)
-
-export_summs(model1, model2, scale = TRUE)
-export_summs(model3, model2,  scale = TRUE)
-
-plot_model(model1, transform = NULL, show.values = TRUE, axis.labels = "", value.offset = .4)
-plot_model(model2, transform = NULL, show.values = TRUE, axis.labels = "", value.offset = .4)
-summary(model2)
->>>>>>> Stashed changes
