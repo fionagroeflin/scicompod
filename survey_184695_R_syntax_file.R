@@ -603,3 +603,7 @@ model <- bic.glm (trust ~ expert+style+passionate+affiliations+personal+intentio
 summary(model,digits=2)
 plot(model)
 imageplot.bma(model)
+
+
+
+blabla
