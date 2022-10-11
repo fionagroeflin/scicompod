@@ -263,7 +263,7 @@ prop.table(table(data_na2$frequency2_recoded, data_na2$gender))*100 #sortiert na
 
 prop_frequency <- prop.table(table(data_na2$frequency2_recoded, data_na2$gender))*100
 
-gglot
+
 hist(prop_frequency)
 
 
@@ -451,6 +451,7 @@ library(lmtest)
 #install.packages("car")
 library(car)
 library(carData)
+library(zoo)
 
 
 
@@ -569,41 +570,120 @@ korr_tab2 <- cor(subset2_cor, method = "pearson")
 
 
 # Modellvergleiche rechnen----------------------------------------------------
-anova(model1, model2)
 
-#p=0.1848 --> 
+anova(model1, model2)
+  #p=0.1848 --> nicht signifikant; Model 2 besser
 
 anova(model3, model2)
+  #p=0.02166 --> signifikant; Model 3 besser
+
+
+### Visualization main analysis ----------
+
+#install.packages("jtools")
+library(jtools)
+#install.packages("huxtable")
+library(huxtable)
+#install.packages("sjPlot")
+library(sjPlot)
+
+export_summs(model1, model2, scale = TRUE)
+export_summs(model3, model2,  scale = TRUE)
+
+p1 <- plot_model(model1, transform = NULL, show.values = TRUE, axis.labels = "", color = "Set2",  value.offset = .3, value.size = 4)
+p1 + font_size(axis_title.x = 15, title = 15, labels.y = 13)
+
+p2 <- plot_model(model2, transform = NULL, show.values = TRUE, axis.labels = "", color = "Set2",  value.offset = .3, value.size = 4) 
+p2 + font_size(axis_title.x = 15, title = 15, labels.y = 13)
+
+p3 <- plot_model(model3, transform = NULL, show.values = TRUE, axis.labels = "", color = "Set2", value.offset = .3, value.size = 4)
+p3 + font_size(axis_title.x = 15, title = 15, labels.y = 13, )
+
+# The “b” values are called the regression weights (or beta coefficients).
+#They measure the association between the predictor variable and the outcome.
+
+
 
 # Bayesian model averaging; PIP -------------------------------------------------
 
 
 library(BAS)
 
-model2BAS <- bas.lm(trust ~ expert + style + passionate + affiliations + personal + intentions + facts + methods + quality + sources + balance + uncertainty, data=data_na2,
-                    prior="ZS-null", modelprior=uniform(), method = "MCMC")
 
-
-diagnostics(model2BAS, type="pip", col = "blue", pch = 16, cex = 1.5)
-diagnostics(model2BAS, type = c("pip", "model"))
 
 library(BMA)
 library(survival)
+install.packages("MASS")
+library(MASS)
+install.packages("dplyr")
+library(dplyr)
 
 # RUI's CODE
-
-mydata<-data %>% 
-  select(trust,expert,style,passionate,affiliations,personal,intentions,facts,methods,quality,sources) %>% 
+library(dplyr)
+mydata <- data_na2 %>% 
+  select(trust, expert, style, passionate, affiliations, personal, intentions, facts, methods, quality, sources, balance, uncertainty) %>% 
   filter(!is.na(trust)) %>% 
   tibble()
 
-summary(lm(trust~expert+style+passionate+affiliations+personal+intentions+facts+methods+quality+sources,data=mydata))
+summary(lm(trust~ expert+style+passionate+affiliations+personal+intentions+facts+methods+quality+sources+balance+uncertainty, data=mydata))
 
-model <- bic.glm (trust ~ expert+style+passionate+affiliations+personal+intentions+facts+methods+quality+sources,data=mydata, glm.family="gaussian")
+model <- bic.glm (trust~ expert+style+passionate+affiliations+personal+intentions+facts+methods+quality+sources+balance+uncertainty, data=mydata, glm.family="gaussian")
 summary(model,digits=2)
 plot(model)
 imageplot.bma(model)
+plot(model,mfrow=c(3,4))
 
 
 
-blabla
+
+#### exploratory analyses with demographic variables: age, gender, education, frequency
+
+modelD <- lm(trust ~ expert + style + passionate + affiliations + personal + intentions + facts + methods + quality + sources + balance + uncertainty + education2 + age2 + gender + frequency2_recoded, data=data_na2)
+summary(modelD)
+
+model <- lm(trust ~ education2 + age2 + +gender + frequency2_recoded, data=data_na2)
+summary(model)
+
+str(data_na2)
+
+#education: ordinaler faktor mit 8 level
+#frequency: ordinaler faktor mit 8 level
+#age: ordinaler faktor mit 100 level
+#gender: factor mit 3 level (other aber nie gewählt)
+
+#--> mit anova(lm_object) kann auch mit nicht kontinuierlichen prädiktoren rechnen; spezialfall von mlr
+# F-Wert interessiert uns; mit zugehörigen p-wert
+
+anova(modelD)
+anova(model)
+summary(model2) #mein ursprüngliches gml
+
+#Signifikanztest zwischen Modell mit demographischen variablen und meinem model2
+  #zuerst weniger komplexes Modell!!!!
+
+anova(model2, modelD) #kleiner p-Wert: <.005 = Alternativhypothese, also ModellD (komplexer) ist tatsächlich besser
+  #p=0.7793 --> nicht sign, einschluss aller demographischer variablen nicht besser
+
+## für jede variable einzeln
+
+modelE <- lm(trust ~ expert + style + passionate + affiliations + personal + intentions + facts + methods + quality + sources + balance + uncertainty + education2, data=data_na2)
+anova(model2, modelE) #education
+  #p=0.3919
+
+modelA <- lm(trust ~ expert + style + passionate + affiliations + personal + intentions + facts + methods + quality + sources + balance + uncertainty +  age2, data=data_na2)
+anova(model2, modelA) #age
+  #p=0.4726
+
+modelG <- lm(trust ~ expert + style + passionate + affiliations + personal + intentions + facts + methods + quality + sources + balance + uncertainty + gender, data=data_na2)
+anova(model2, modelG) #gender
+  #p=0.9772
+
+modelF <- lm(trust ~ expert + style + passionate + affiliations + personal + intentions + facts + methods + quality + sources + balance + uncertainty +  frequency2_recoded, data=data_na2)
+anova(model2, modelF) #frequency
+  #p=0.9874
+
+#--> weder gemeinsam noch einzeln haben die demographischen variablen einen Einfluss; resp sie verbessern nichts
+
+
+
+
